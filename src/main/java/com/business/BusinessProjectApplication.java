@@ -4,6 +4,8 @@ package com.business;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import jakarta.annotation.PostConstruct;
+
 
 @SpringBootApplication
 public class BusinessProjectApplication {
@@ -12,6 +14,11 @@ public class BusinessProjectApplication {
 	{
 		SpringApplication.run(BusinessProjectApplication.class, args);
 	
+	}
+
+	@PostConstruct
+	public void init() {
+		System.out.println("HomeController loaded");
 	}
 
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.business.entities.Product;
 import com.business.loginCredentials.AdminLogin;
@@ -16,6 +17,12 @@ public class HomeController
 {
 	@Autowired
 	private ProductServices productServices;
+
+	@ResponseBody
+	@GetMapping("/test")
+	public String test() {
+		return "Application is working!";
+	}
 	@GetMapping("/home")
 	public String home()
 	{
