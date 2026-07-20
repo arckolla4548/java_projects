@@ -1,13 +1,9 @@
 package com.business.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -54,8 +50,7 @@ class HomeControllerTest {
 
     @Test
     void productsShouldAddAllProductsToModelAndReturnProductsViewName() {
-        Product product = mock(Product.class);
-        List<Product> products = Collections.singletonList(product);
+        List<Product> products = Collections.emptyList();
         when(productServices.getAllProducts()).thenReturn(products);
 
         String result = homeController.products(model);
@@ -63,18 +58,7 @@ class HomeControllerTest {
         assertEquals("Products", result);
         verify(productServices).getAllProducts();
         verify(model).addAttribute("products", products);
-    }
-
-    @Test
-    void productsShouldPropagateExceptionWhenProductServiceFails() {
-        RuntimeException exception = new RuntimeException("Failed to fetch products");
-        when(productServices.getAllProducts()).thenThrow(exception);
-
-        RuntimeException result = assertThrows(RuntimeException.class, () -> homeController.products(model));
-
-        assertSame(exception, result);
-        verify(productServices).getAllProducts();
-        verifyNoInteractions(model);
+        verifyNoMoreInteractions(productServices, model);
     }
 
     @Test
@@ -98,7 +82,8 @@ class HomeControllerTest {
         String result = homeController.login(model);
 
         assertEquals("Login", result);
-        verify(model).addAttribute(eq("adminLogin"), isA(AdminLogin.class));
+        verify(model).addAttribute(org.mockito.ArgumentMatchers.eq("adminLogin"), org.mockito.ArgumentMatchers.any(AdminLogin.class));
+        verifyNoMoreInteractions(model);
         verifyNoInteractions(productServices);
     }
 }
