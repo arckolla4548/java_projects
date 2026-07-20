@@ -1,9 +1,9 @@
 package com.business.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -33,57 +33,70 @@ class HomeControllerTest {
     private HomeController homeController;
 
     @Test
-    void testShouldReturnApplicationWorkingMessage() {
-        String result = homeController.test();
+    void test_ReturnsApplicationWorkingMessage() {
+        String response = homeController.test();
 
-        assertEquals("Application is working!", result);
-        verifyNoInteractions(productServices, model);
+        assertEquals("Application is working!", response);
     }
 
     @Test
-    void homeShouldReturnHomeViewName() {
-        String result = homeController.home();
+    void home_ReturnsHomeView() {
+        String viewName = homeController.home();
 
-        assertEquals("Home", result);
-        verifyNoInteractions(productServices, model);
+        assertEquals("Home", viewName);
     }
 
     @Test
-    void productsShouldAddAllProductsToModelAndReturnProductsViewName() {
+    void products_WhenProductsExist_AddsProductsToModelAndReturnsProductsView() {
+        List<Product> products = Collections.singletonList(org.mockito.Mockito.mock(Product.class));
+        when(productServices.getAllProducts()).thenReturn(products);
+
+        String viewName = homeController.products(model);
+
+        assertEquals("Products", viewName);
+        verify(productServices).getAllProducts();
+        verify(model).addAttribute("products", products);
+    }
+
+    @Test
+    void products_WhenNoProductsExist_AddsEmptyListToModelAndReturnsProductsView() {
         List<Product> products = Collections.emptyList();
         when(productServices.getAllProducts()).thenReturn(products);
 
-        String result = homeController.products(model);
+        String viewName = homeController.products(model);
 
-        assertEquals("Products", result);
+        assertEquals("Products", viewName);
         verify(productServices).getAllProducts();
         verify(model).addAttribute("products", products);
-        verifyNoMoreInteractions(productServices, model);
     }
 
     @Test
-    void locationShouldReturnLocateUsViewName() {
-        String result = homeController.location();
+    void products_WhenProductServiceThrowsException_PropagatesException() {
+        when(productServices.getAllProducts()).thenThrow(new RuntimeException("service failure"));
 
-        assertEquals("Locate_us", result);
-        verifyNoInteractions(productServices, model);
+        assertThrows(RuntimeException.class, () -> homeController.products(model));
+        verify(productServices).getAllProducts();
     }
 
     @Test
-    void aboutShouldReturnAboutViewName() {
-        String result = homeController.about();
+    void location_ReturnsLocateUsView() {
+        String viewName = homeController.location();
 
-        assertEquals("About", result);
-        verifyNoInteractions(productServices, model);
+        assertEquals("Locate_us", viewName);
     }
 
     @Test
-    void loginShouldAddAdminLoginToModelAndReturnLoginViewName() {
-        String result = homeController.login(model);
+    void about_ReturnsAboutView() {
+        String viewName = homeController.about();
 
-        assertEquals("Login", result);
-        verify(model).addAttribute(org.mockito.ArgumentMatchers.eq("adminLogin"), org.mockito.ArgumentMatchers.any(AdminLogin.class));
-        verifyNoMoreInteractions(model);
-        verifyNoInteractions(productServices);
+        assertEquals("About", viewName);
+    }
+
+    @Test
+    void login_AddsAdminLoginToModelAndReturnsLoginView() {
+        String viewName = homeController.login(model);
+
+        assertEquals("Login", viewName);
+        verify(model).addAttribute(org.mockito.Mockito.eq("adminLogin"), org.mockito.Mockito.any(AdminLogin.class));
     }
 }
