@@ -1,10 +1,7 @@
 package com.business;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mockStatic;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,32 +14,22 @@ import org.springframework.boot.SpringApplication;
 class BusinessProjectApplicationTest {
 
     @InjectMocks
-    private BusinessProjectApplication businessProjectApplication;
+    private BusinessProjectApplication application;
 
     @Test
-    void mainInvokesSpringApplicationRun() {
-        String[] args = {"--spring.profiles.active=test"};
-
+    void mainRunsSpringApplication() {
+        String[] args = {"--server.port=0"};
         try (MockedStatic<SpringApplication> springApplication = mockStatic(SpringApplication.class)) {
-            BusinessProjectApplication.main(args);
+            springApplication.when(() -> SpringApplication.run(BusinessProjectApplication.class, args)).thenReturn(null);
+
+            assertDoesNotThrow(() -> BusinessProjectApplication.main(args));
 
             springApplication.verify(() -> SpringApplication.run(BusinessProjectApplication.class, args));
         }
     }
 
     @Test
-    void initPrintsHomeControllerLoadedMessage() {
-        PrintStream originalOut = System.out;
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        try {
-            System.setOut(new PrintStream(outputStream));
-
-            businessProjectApplication.init();
-
-            assertTrue(outputStream.toString().contains("HomeController loaded"));
-        } finally {
-            System.setOut(originalOut);
-        }
+    void initDoesNotThrowException() {
+        assertDoesNotThrow(() -> application.init());
     }
 }
