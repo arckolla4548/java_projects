@@ -2,6 +2,7 @@ package com.business.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
@@ -23,56 +24,70 @@ class ProductControllerTest {
     private ProductController productController;
 
     @Test
-    void addProduct_AddsProductAndReturnsRedirect() {
-        Product product = org.mockito.Mockito.mock(Product.class);
+    void addProductSavesProductAndRedirectsToAdminServices() {
+        Product product = new Product();
 
-        String viewName = productController.addProduct(product);
+        String result = productController.addProduct(product);
 
-        assertEquals("redirect:/admin/services", viewName);
+        assertEquals("redirect:/admin/services", result);
         verify(productServices).addProduct(product);
     }
 
     @Test
-    void addProduct_WhenProductServiceThrowsException_PropagatesException() {
-        Product product = org.mockito.Mockito.mock(Product.class);
-        org.mockito.Mockito.doThrow(new RuntimeException("service failure")).when(productServices).addProduct(product);
+    void addProductPropagatesServiceException() {
+        Product product = new Product();
+        RuntimeException exception = new RuntimeException("Unable to add product");
+        doThrow(exception).when(productServices).addProduct(product);
 
-        assertThrows(RuntimeException.class, () -> productController.addProduct(product));
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> productController.addProduct(product));
+
+        assertEquals(exception, thrown);
         verify(productServices).addProduct(product);
     }
 
     @Test
-    void updateProduct_UpdatesProductAndReturnsRedirect() {
-        Product product = org.mockito.Mockito.mock(Product.class);
+    void updateProductUpdatesProductAndRedirectsToAdminServices() {
+        Product product = new Product();
+        int productId = 10;
 
-        String viewName = productController.updateProduct(product, 10);
+        String result = productController.updateProduct(product, productId);
 
-        assertEquals("redirect:/admin/services", viewName);
-        verify(productServices).updateproduct(product, 10);
+        assertEquals("redirect:/admin/services", result);
+        verify(productServices).updateproduct(product, productId);
     }
 
     @Test
-    void updateProduct_WhenProductServiceThrowsException_PropagatesException() {
-        Product product = org.mockito.Mockito.mock(Product.class);
-        org.mockito.Mockito.doThrow(new RuntimeException("service failure")).when(productServices).updateproduct(product, 10);
+    void updateProductPropagatesServiceException() {
+        Product product = new Product();
+        int productId = 10;
+        RuntimeException exception = new RuntimeException("Unable to update product");
+        doThrow(exception).when(productServices).updateproduct(product, productId);
 
-        assertThrows(RuntimeException.class, () -> productController.updateProduct(product, 10));
-        verify(productServices).updateproduct(product, 10);
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> productController.updateProduct(product, productId));
+
+        assertEquals(exception, thrown);
+        verify(productServices).updateproduct(product, productId);
     }
 
     @Test
-    void delete_DeletesProductAndReturnsRedirect() {
-        String viewName = productController.delete(10);
+    void deleteDeletesProductAndRedirectsToAdminServices() {
+        int productId = 10;
 
-        assertEquals("redirect:/admin/services", viewName);
-        verify(productServices).deleteProduct(10);
+        String result = productController.delete(productId);
+
+        assertEquals("redirect:/admin/services", result);
+        verify(productServices).deleteProduct(productId);
     }
 
     @Test
-    void delete_WhenProductServiceThrowsException_PropagatesException() {
-        org.mockito.Mockito.doThrow(new RuntimeException("service failure")).when(productServices).deleteProduct(10);
+    void deletePropagatesServiceException() {
+        int productId = 10;
+        RuntimeException exception = new RuntimeException("Unable to delete product");
+        doThrow(exception).when(productServices).deleteProduct(productId);
 
-        assertThrows(RuntimeException.class, () -> productController.delete(10));
-        verify(productServices).deleteProduct(10);
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> productController.delete(productId));
+
+        assertEquals(exception, thrown);
+        verify(productServices).deleteProduct(productId);
     }
 }
