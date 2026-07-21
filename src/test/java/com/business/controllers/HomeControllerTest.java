@@ -1,9 +1,11 @@
 package com.business.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -33,70 +35,66 @@ class HomeControllerTest {
     private HomeController homeController;
 
     @Test
-    void test_ReturnsApplicationWorkingMessage() {
-        String response = homeController.test();
+    void testReturnsApplicationWorkingMessage() {
+        String result = homeController.test();
 
-        assertEquals("Application is working!", response);
+        assertEquals("Application is working!", result);
+        verifyNoInteractions(productServices, model);
     }
 
     @Test
-    void home_ReturnsHomeView() {
-        String viewName = homeController.home();
+    void homeReturnsHomeView() {
+        String result = homeController.home();
 
-        assertEquals("Home", viewName);
+        assertEquals("Home", result);
+        verifyNoInteractions(productServices, model);
     }
 
     @Test
-    void products_WhenProductsExist_AddsProductsToModelAndReturnsProductsView() {
-        List<Product> products = Collections.singletonList(org.mockito.Mockito.mock(Product.class));
+    void productsAddsProductsToModelAndReturnsProductsView() {
+        List<Product> products = Collections.singletonList(new Product());
         when(productServices.getAllProducts()).thenReturn(products);
 
-        String viewName = homeController.products(model);
+        String result = homeController.products(model);
 
-        assertEquals("Products", viewName);
+        assertEquals("Products", result);
         verify(productServices).getAllProducts();
         verify(model).addAttribute("products", products);
     }
 
     @Test
-    void products_WhenNoProductsExist_AddsEmptyListToModelAndReturnsProductsView() {
-        List<Product> products = Collections.emptyList();
-        when(productServices.getAllProducts()).thenReturn(products);
+    void productsPropagatesServiceException() {
+        RuntimeException exception = new RuntimeException("Unable to load products");
+        when(productServices.getAllProducts()).thenThrow(exception);
 
-        String viewName = homeController.products(model);
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> homeController.products(model));
 
-        assertEquals("Products", viewName);
-        verify(productServices).getAllProducts();
-        verify(model).addAttribute("products", products);
-    }
-
-    @Test
-    void products_WhenProductServiceThrowsException_PropagatesException() {
-        when(productServices.getAllProducts()).thenThrow(new RuntimeException("service failure"));
-
-        assertThrows(RuntimeException.class, () -> homeController.products(model));
+        assertEquals(exception, thrown);
         verify(productServices).getAllProducts();
     }
 
     @Test
-    void location_ReturnsLocateUsView() {
-        String viewName = homeController.location();
+    void locationReturnsLocateUsView() {
+        String result = homeController.location();
 
-        assertEquals("Locate_us", viewName);
+        assertEquals("Locate_us", result);
+        verifyNoInteractions(productServices, model);
     }
 
     @Test
-    void about_ReturnsAboutView() {
-        String viewName = homeController.about();
+    void aboutReturnsAboutView() {
+        String result = homeController.about();
 
-        assertEquals("About", viewName);
+        assertEquals("About", result);
+        verifyNoInteractions(productServices, model);
     }
 
     @Test
-    void login_AddsAdminLoginToModelAndReturnsLoginView() {
-        String viewName = homeController.login(model);
+    void loginAddsAdminLoginToModelAndReturnsLoginView() {
+        String result = homeController.login(model);
 
-        assertEquals("Login", viewName);
-        verify(model).addAttribute(org.mockito.Mockito.eq("adminLogin"), org.mockito.Mockito.any(AdminLogin.class));
+        assertEquals("Login", result);
+        verify(model).addAttribute(eq("adminLogin"), any(AdminLogin.class));
+        verifyNoInteractions(productServices);
     }
 }
