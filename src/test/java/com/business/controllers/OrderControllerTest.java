@@ -14,7 +14,7 @@ class OrderControllerTest {
     private OrderController orderController;
 
     @Test
-    void orderController_CanBeInstantiated() {
+    void controllerCanBeCreated() {
         assertNotNull(orderController);
     }
 }
